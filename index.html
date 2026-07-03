@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柳州飞友小学 航空学习学生端 FY系统</title>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft Yahei",sans-serif;
+}
+body{
+    background:#f4f7fc;
+}
+.container{
+    max-width:1400px;
+    margin:0 auto;
+    padding:20px;
+}
+header{
+    background:#004099;
+    color:#fff;
+    padding:16px 24px;
+    border-radius:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+.user-fy-code{
+    background:#ff9800;
+    padding:7px 14px;
+    border-radius:6px;
+    font-weight:bold;
+}
+.header-buttons button{
+    margin-left:10px;
+}
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.2s;
+}
+button:hover{
+    opacity:0.85;
+}
+.btn-primary{background:#004099;color:white;}
+.btn-success{background:#2e7d32;color:white;}
+.btn-danger{background:#c62828;color:white;}
+.btn-normal{background:#eeeeee;color:#333;}
+
+.tab-wrap{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+}
+.tab-item.active{
+    background:#004099;
+    color:#fff;
+}
+.panel{
+    background:#fff;
+    padding:24px;
+    border-radius:10px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+    display:none;
+    margin-bottom:20px;
+}
+.panel.active{
+    display:block;
+}
+.form-row{
+    margin:14px 0;
+}
+label{
+    display:inline-block;
+    width:130px;
+}
+input,select{
+    padding:9px;
+    width:320px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:14px;
+}
+.error-tip{
+    color:#d32f2f;
+    font-size:13px;
+    margin-top:4px;
+    display:none;
+}
+
+/* 打卡签到区域 */
+.sign-box{
+    text-align:center;
+    padding:30px;
+    background:#f0f8ff;
+    border-radius:10px;
+    margin:20px 0;
+}
+.sign-status{
+    font-size:18px;
+    margin:15px 0;
+}
+.record-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:16px;
+}
+.record-table th,.record-table td{
+    border:1px solid #e0e0e0;
+    padding:11px;
+    text-align:center;
+}
+.record-table th{
+    background:#f0f5ff;
+}
+
+/* 航司飞机展示 */
+.air-display{
+    display:flex;
+    gap:35px;
+    align-items:center;
+    margin:25px 0;
+}
+.air-logo img{
+    width:180px;
+    height:auto;
+}
+.plane-img img{
+    max-width:520px;
+    max-height:300px;
+    border-radius:8px;
+    border:1px solid #eee;
+}
+
+/* 航空趣闻卡片 */
+.fact-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-top:20px;
+}
+.fact-card{
+    border:1px solid #eee;
+    border-radius:8px;
+    overflow:hidden;
+}
+.fact-card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+}
+.fact-text{
+    padding:12px;
+}
+
+/* 弹窗遮罩 */
+.modal-mask{
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.55);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+.modal-box{
+    background:#fff;
+    padding:28px;
+    border-radius:10px;
+    min-width:450px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h2>柳州飞友小学 航空学习学生端</h2>
+            <p id="campusLabel">当前校区：柳州飞友小学总部</p>
+        </div>
+        <div class="user-fy-code" id="fyCodeText">入场编码：未登录</div>
+        <div class="header-buttons">
+            <button class="btn-primary" onclick="openModal('loginModal')">网易邮箱登录</button>
+            <button class="btn-normal" onclick="openModal('registerModal')">账号注册</button>
+            <button class="btn-normal" onclick="switchCampus()">切换校区</button>
+        </div>
+    </header>
+
+    <!-- 顶部标签导航 -->
+    <div class="tab-wrap">
+        <button class="tab-item btn-primary active" onclick="switchPanel('homePanel')">航空趣闻首页</button>
+        <button class="tab-item btn-normal" onclick="switchPanel('signPanel')">每日签到打卡</button>
+        <button class="tab-item btn-normal" onclick="switchPanel('airPanel')">航司飞机浏览</button>
+    </div>
+
+    <!-- 首页：航空趣味科普 -->
+    <div id="homePanel" class="panel active">
+        <h3>✈️ 航空趣味小知识推荐</h3>
+        <div class="fact-grid">
+            <div class="fact-card">
+                <img src="https://img2.baidu.com/it/u=1256987412,3874512113&fm=253&fmt=auto" alt="波音747">
+                <div class="fact-text">
+                    <h4>波音747 空中女王</h4>
+                    <p>经典宽体客机，驼峰机头辨识度极高，服役超过半个世纪</p>
+                    <button class="btn-primary" onclick="openUrl('https://baike.baidu.com/item/波音747')">查看百科</button>
+                </div>
+            </div>
+            <div class="fact-card">
+                <img src="https://img2.baidu.com/it/u=2258741236,1125478965&fm=253&fmt=auto" alt="空客A380">
+                <div class="fact-text">
+                    <h4>空客A380 双层巨无霸</h4>
+                    <p>全球最大客运民航客机，双层客舱，载客能力极强</p>
+                    <button class="btn-primary" onclick="openUrl('https://baike.baidu.com/item/空中客车A380')">查看百科</button>
+                </div>
+            </div>
+            <div class="fact-card">
+                <img src="https://img2.baidu.com/it/u=3541256987,2897456123&fm=253&fmt=auto" alt="协和客机">
+                <div class="fact-text">
+                    <h4>协和超音速客机</h4>
+                    <p>超音速民航，伦敦飞纽约仅3小时，现已全部退役</p>
+                    <button class="btn-primary" onclick="openUrl('https://baike.baidu.com/item/协和式超音速客机')">查看百科</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学生签到打卡面板 -->
+    <div id="signPanel" class="panel">
+        <h3>📅 每日签到打卡中心</h3>
+        <div class="sign-box">
+            <div class="sign-status" id="todaySign">今日未打卡</div>
+            <button class="btn-success" onclick="doSignIn()">立即签到打卡</button>
+        </div>
+        <h4>打卡记录</h4>
+        <table class="record-table">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>打卡日期</th>
+                    <th>打卡状态</th>
+                </tr>
+            </thead>
+            <tbody id="signRecordBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 航司与机型选择（和教师端完全一致涂装切换） -->
+    <div id="airPanel" class="panel">
+        <h3>🛫 全球航空公司 & 机型资料库</h3>
+        <div class="form-row">
+            <label>选择航空公司：</label>
+            <select id="airlineSelect" onchange="refreshAirDisplay()">
+                <option value="ca">中国国际航空</option>
+                <option value="mu">东方航空</option>
+                <option value="cz">南方航空</option>
+                <option value="hx">海南航空</option>
+                <option value="cx">国泰航空</option>
+                <option value="jl">日本全日空ANA</option>
+                <option value="ke">大韩航空</option>
+                <option value="sq">新加坡航空</option>
+                <option value="ek">阿联酋航空</option>
+                <option value="qr">卡塔尔航空</option>
+                <option value="lh">汉莎航空</option>
+                <option value="af">法国航空</option>
+                <option value="ba">英国航空</option>
+                <option value="aa">美国航空</option>
+                <option value="ua">联合航空</option>
+                <option value="dl">达美航空</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label>选择飞机机型：</label>
+            <select id="planeModelSelect" onchange="refreshAirDisplay()">
+                <option value="b737">波音737</option>
+                <option value="b747">波音747</option>
+                <option value="b777">波音777</option>
+                <option value="b787">波音787梦想客机</option>
+                <option value="a320">空客A320</option>
+                <option value="a330">空客A330</option>
+                <option value="a350">空客A350</option>
+                <option value="a380">空客A380</option>
+                <option value="md11">麦道MD-11</option>
+                <option value="concorde">协和超音速客机</option>
+            </select>
+        </div>
+        <div class="air-display">
+            <div class="air-logo">
+                <img id="airLogoImg" src="" alt="航司LOGO">
+            </div>
+            <div class="plane-img">
+                <img id="planeImg" src="" alt="飞机涂装">
+            </div>
+        </div>
+        <button class="btn-primary" onclick="openUrl('https://flightradar24.com')">跳转实时航班网站</button>
+    </div>
+
+    <!-- 登录弹窗 -->
+    <div class="modal-mask" id="loginModal">
+        <div class="modal-box">
+            <h3>网易邮箱登录</h3>
+            <div class="form-row">
+                <label>网易邮箱：</label>
+                <input type="text" id="loginEmail" placeholder="xxx@163.com">
+                <div class="error-tip" id="loginEmailErr">邮箱格式错误，仅支持163网易邮箱</div>
+            </div>
+            <div class="form-row">
+                <label>验证码：</label>
+                <input type="text" id="loginCode" placeholder="输入验证码">
+                <div class="error-tip" id="loginCodeErr">验证码不正确</div>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px;">
+                <button class="btn-primary" onclick="doLogin()">确认登录</button>
+                <button class="btn-normal" onclick="closeModal('loginModal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册弹窗 -->
+    <div class="modal-mask" id="registerModal">
+        <div class="modal-box">
+            <h3>网易邮箱账号注册</h3>
+            <div class="form-row">
+                <label>网易邮箱：</label>
+                <input type="text" id="regEmail" placeholder="xxx@163.com">
+                <div class="error-tip" id="regEmailErr">邮箱格式错误，仅支持163网易邮箱</div>
+            </div>
+            <div class="form-row">
+                <label>验证码：</label>
+                <input type="text" id="regCode" placeholder="输入邮箱收到的验证码">
+                <div class="error-tip" id="regCodeErr">验证码不正确</div>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px;">
+                <button class="btn-success" onclick="doRegister()">完成注册</button>
+                <button class="btn-normal" onclick="closeModal('registerModal')">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 全局配置 和教师端统一
+let currentCampus = "总部";
+let userEnterIndex = 0;
+let isLogin = false;
+let signRecordList = [];
+const TEST_CODE = "123456";
+
+// 航司LOGO数据（和教师端完全一致）
+const airlineData = {
+    ca:{logo:"https://img1.baidu.com/it/u=1980012112,3080012221&fm=253&fmt=auto"},
+    mu:{logo:"https://img1.baidu.com/it/u=1209121122,2211223344&fm=253&fmt=auto"},
+    cz:{logo:"https://img1.baidu.com/it/u=2233112211,3344221122&fm=253&fmt=auto"},
+    hx:{logo:"https://img1.baidu.com/it/u=3322112233,1122334455&fm=253&fmt=auto"},
+    cx:{logo:"https://img1.baidu.com/it/u=4411223344,2211334455&fm=253&fmt=auto"},
+    jl:{logo:"https://img1.baidu.com/it/u=5522113344,1133224455&fm=253&fmt=auto"},
+    ke:{logo:"https://img1.baidu.com/it/u=1133224455,2244113355&fm=253&fmt=auto"},
+    sq:{logo:"https://img1.baidu.com/it/u=2244113355,3311224455&fm=253&fmt=auto"},
+    ek:{logo:"https://img1.baidu.com/it/u=3311224455,1144223355&fm=253&fmt=auto"},
+    qr:{logo:"https://img1.baidu.com/it/u=4422113355,2233114455&fm=253&fmt=auto"},
+    lh:{logo:"https://img1.baidu.com/it/u=1122334455,3344112255&fm=253&fmt=auto"},
+    af:{logo:"https://img1.baidu.com/it/u=2233441155,1144332255&fm=253&fmt=auto"},
+    ba:{logo:"https://img1.baidu.com/it/u=3344112255,2211443355&fm=253&fmt=auto"},
+    aa:{logo:"https://img1.baidu.com/it/u=4411332255,1122443355&fm=253&fmt=auto"},
+    ua:{logo:"https://img1.baidu.com/it/u=1133442255,2244113355&fm=253&fmt=auto"},
+    dl:{logo:"https://img1.baidu.com/it/u=2244331155,3311442255&fm=253&fmt=auto"}
+};
+
+// 飞机涂装图片库
+const planeImgBase = {
+    b737:"https://img2.baidu.com/it/u=123456789,987654321&fm=253&fmt=auto",
+    b747:"https://img2.baidu.com/it/u=1256987412,3874512113&fm=253&fmt=auto",
+    b777:"https://img2.baidu.com/it/u=234567891,198765432&fm=253&fmt=auto",
+    b787:"https://img2.baidu.com/it/u=345678912,298765431&fm=253&fmt=auto",
+    a320:"https://img2.baidu.com/it/u=456789123,398765421&fm=253&fmt=auto",
+    a330:"https://img2.baidu.com/it/u=567891234,498765321&fm=253&fmt=auto",
+    a350:"https://img2.baidu.com/it/u=678912345,598765231&fm=253&fmt=auto",
+    a380:"https://img2.baidu.com/it/u=2258741236,1125478965&fm=253&fmt=auto",
+    md11:"https://img2.baidu.com/it/u=789123456,698765123&fm=253&fmt=auto",
+    concorde:"https://img2.baidu.com/it/u=3541256987,2897456123&fm=253&fmt=auto"
+};
+
+// 初始化飞机展示
+refreshAirDisplay();
+renderSignRecord();
+
+// 校区切换
+function switchCampus(){
+    if(currentCampus === "总部"){
+        currentCampus = "白云机场分部";
+        document.getElementById("campusLabel").innerText = "当前校区：白云机场分部";
+    }else{
+        currentCampus = "总部";
+        document.getElementById("campusLabel").innerText = "当前校区：柳州飞友小学总部";
+    }
+}
+
+// 面板切换
+function switchPanel(panelId){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// 弹窗控制
+function openModal(id){
+    document.getElementById(id).style.display = 'flex';
+    document.querySelectorAll('.error-tip').forEach(el=>el.style.display='none');
+}
+function closeModal(id){
+    document.getElementById(id).style.display = 'none';
+}
+
+// 新窗口打开网页
+function openUrl(url){
+    window.open(url,"_blank");
+}
+
+// 刷新航司飞机涂装
+function refreshAirDisplay(){
+    let airKey = document.getElementById("airlineSelect").value;
+    let planeKey = document.getElementById("planeModelSelect").value;
+    document.getElementById("airLogoImg").src = airlineData[airKey].logo;
+    document.getElementById("planeImg").src = planeImgBase[planeKey];
+}
+
+// 网易163邮箱格式校验
+function check163Email(email){
+    const reg = /^[a-zA-Z0-9_\-\.]+@163\.com$/;
+    return reg.test(email);
+}
+
+// 登录逻辑
+function doLogin(){
+    let email = document.getElementById("loginEmail").value.trim();
+    let code = document.getElementById("loginCode").value.trim();
+    let emailErr = document.getElementById("loginEmailErr");
+    let codeErr = document.getElementById("loginCodeErr");
+    let pass = true;
+
+    emailErr.style.display = "none";
+    codeErr.style.display = "none";
+
+    if(!check163Email(email)){
+        emailErr.style.display = "block";
+        pass = false;
+    }
+    if(code !== TEST_CODE){
+        codeErr.style.display = "block";
+        pass = false;
+    }
+    if(!pass) return;
+
+    userEnterIndex +=1;
+    let fyNum = String(userEnterIndex).padStart(3,'0');
+    document.getElementById("fyCodeText").innerText = `入场编码：FY${fyNum}`;
+    isLogin = true;
+    alert("登录成功！你的入场编码：FY"+fyNum);
+    closeModal('loginModal');
+}
+
+// 注册逻辑
+function doRegister(){
+    let email = document.getElementById("regEmail").value.trim();
+    let code = document.getElementById("regCode").value.trim();
+    let emailErr = document.getElementById("regEmailErr");
+    let codeErr = document.getElementById("regCodeErr");
+    let pass = true;
+
+    emailErr.style.display = "none";
+    codeErr.style.display = "none";
+
+    if(!check163Email(email)){
+        emailErr.style.display = "block";
+        pass = false;
+    }
+    if(code !== TEST_CODE){
+        codeErr.style.display = "block";
+        pass = false;
+    }
+    if(!pass) return;
+
+    userEnterIndex +=1;
+    let fyNum = String(userEnterIndex).padStart(3,'0');
+    document.getElementById("fyCodeText").innerText = `入场编码：FY${fyNum}`;
+    isLogin = true;
+    alert("注册成功！自动分配入场编码：FY"+fyNum);
+    closeModal('registerModal');
+}
+
+// 学生签到打卡
+function doSignIn(){
+    if(!isLogin){
+        alert("请先登录账号再进行打卡！");
+        return;
+    }
+    const today = new Date().toLocaleDateString();
+    // 判断今日是否已打卡
+    const hasSigned = signRecordList.some(item=>item.date === today);
+    if(hasSigned){
+        alert("今日已经完成打卡，无法重复签到");
+        return;
+    }
+    signRecordList.push({
+        date: today,
+        status: "已签到"
+    });
+    document.getElementById("todaySign").innerText = "✅ 今日已完成打卡";
+    renderSignRecord();
+    alert("签到打卡成功！");
+}
+
+// 渲染打卡记录表
+function renderSignRecord(){
+    let tbody = document.getElementById("signRecordBody");
+    tbody.innerHTML = "";
+    signRecordList.forEach((item,index)=>{
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${index+1}</td>
+            <td>${item.date}</td>
+            <td>${item.status}</td>
+        `;
+        tbody.appendChild(tr);
+    })
+}
+</script>
+</body>
+</html>
